@@ -1,0 +1,95 @@
+Phase 1:
+    基本規定:
+        server 端：receive message from client, send response to client, check for user info and reply
+        client 端：send message to server, receive response from server, user login, user logout, user register
+
+For server,
+Summary is below:
+- create a socket - Get the file descriptor!
+- bind to an address -What port am I on?
+- listen on a port, and wait for a connection to be established.
+- accept the connection from a client.
+- send/recv - the same way we read and write for a file.
+- shutdown to end read/write.
+- close to releases data.
+
+1. Creating the Server Socket
+```
+int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+```
+socketfd: It is the file descriptor for the socket.
+AF_INET: It specifies the IPv4 protocol family.
+SOCK_STREAM: It defines that the TCP type socket.
+
+2. Defining Server Address
+```
+sockaddr_in serverAddress;
+serverAddress.sin_family = AF_INET;
+serverAddress.sin_port = htons(8080);
+serverAddress.sin_addr.s_addr = INADDR_ANY;
+```
+sockaddr_in: It is the data type that is used to store the address of the socket. (in) means internet, to save the address related to IPv4.
+htons(): This function is used to convert the unsigned int from machine byte order to network byte order.
+INADDR_ANY: It is used when we don’t want to bind our socket to any particular IP and instead make it listen to all the available IPs. // server need this
+
+3. Binding the Server Socket
+```
+bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+```
+
+4. Listening for Connections
+```
+listen(serverSocket, 5);
+```
+
+5. Accepting a Client Connection
+```
+int clientSocket = accept(serverSocket, nullptr, nullptr);
+```
+
+6. Receiving Data from the Client
+```
+char buffer[1024] = {0};
+recv(clientSocket, buffer, sizeof(buffer), 0);
+cout << "Message from client: " << buffer << endl;
+```
+
+7. Closing the Server Socket
+```
+close(serverSocket);
+```
+
+For client,
+Summary is below:
+- create a socket.
+- connect to a server.
+- send/recv - repeat until we have or receive data
+- shutdown to end read/write.
+- close to releases data.
+
+1. Creating the Client Socket
+```
+int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+```
+
+2. Defining Server Address
+sockaddr_in serverAddress;
+serverAddress.sin_family = AF_INET;
+serverAddress.sin_port = htons(8080);
+serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+3. Connecting to the Server
+```
+connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+```
+
+4. Sending Data to the Server
+```
+const char* message = "Hello, server!";
+send(clientSocket, message, strlen(message), 0);
+```
+
+5. Closing the Client Socket
+```
+close(clientSocket);
+```
